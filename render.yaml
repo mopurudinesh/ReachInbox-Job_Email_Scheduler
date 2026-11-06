@@ -5,7 +5,7 @@ services:
     runtime: node
     plan: free
     region: singapore
-    buildCommand: npm install && npm run build:shared && npm run db:generate && npm run db:migrate && npm run build
+    buildCommand: npm install && npm run build:shared && npm run db:generate && npm run db:deploy && npm run build
     startCommand: npx concurrently "node apps/api/dist/app.js" "node apps/worker/dist/index.js"
     envVars:
       - key: NODE_ENV
@@ -59,14 +59,14 @@ services:
       - key: DEFAULT_DELAY_BETWEEN_EMAILS_SECONDS
         value: 2
 
-# 2. React Frontend Static Site
-- type: web
-  name: reachinbox-web
-  runtime: static
-  plan: free
-  region: singapore
-  buildCommand: npm install && npm run build:shared && npm run build --workspace=@reachinbox/web
-  staticPublishPath: apps/web/dist
+  # 2. React Frontend Static Site
+  - type: web
+    name: reachinbox-web
+    runtime: static
+    plan: free
+    region: singapore
+    buildCommand: npm install && npm run build:shared && npm run build --workspace=@reachinbox/web
+    staticPublishPath: apps/web/dist
 
 # 3. Managed PostgreSQL Database
 databases:
@@ -74,3 +74,4 @@ databases:
     databaseName: reachinbox_db
     user: reachinbox_user
     plan: free
+    region: singapore

@@ -20,6 +20,7 @@
     "dev": "npm run build:shared && concurrently -n \"shared,api,worker,web\" -c \"magenta,blue,green,cyan\" \"npm:dev:shared\" \"npm:dev:api\" \"npm:dev:worker\" \"npm:dev:web\"",
     "db:generate": "npm run db:generate --workspace=@reachinbox/api",
     "db:migrate": "npm run db:migrate --workspace=@reachinbox/api",
+    "db:deploy": "npm run db:deploy --workspace=@reachinbox/api",
     "db:studio": "npm run db:studio --workspace=@reachinbox/api",
     "search:reindex": "npm run search:reindex --workspace=@reachinbox/api",
     "test": "npm run test --workspaces --if-present"
