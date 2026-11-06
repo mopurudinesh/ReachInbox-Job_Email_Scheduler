@@ -64,6 +64,7 @@ services:
   name: reachinbox-web
   runtime: static
   plan: free
+  region: singapore
   buildCommand: npm install && npm run build:shared && npm run build --workspace=@reachinbox/web
   staticPublishPath: apps/web/dist
 
