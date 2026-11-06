@@ -72,6 +72,7 @@ databases:
     databaseName: reachinbox_db
     user: reachinbox_user
     plan: free
+    plan: free
 
 # 4. Managed Redis Instance
 # Note: Render Key-Value is provisioned alongside the services
