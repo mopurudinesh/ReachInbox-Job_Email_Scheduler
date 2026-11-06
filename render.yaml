@@ -59,12 +59,13 @@ services:
       - key: DEFAULT_DELAY_BETWEEN_EMAILS_SECONDS
         value: 2
 
-  # 2. React Frontend Static Site
-  - type: static
-    name: reachinbox-web
-    plan: free
-    buildCommand: npm install && npm run build:shared && npm run build --workspace=@reachinbox/web
-    staticPublishPath: apps/web/dist
+# 2. React Frontend Static Site
+- type: web
+  name: reachinbox-web
+  runtime: static
+  plan: free
+  buildCommand: npm install && npm run build:shared && npm run build --workspace=@reachinbox/web
+  staticPublishPath: apps/web/dist
 
 # 3. Managed PostgreSQL Database
 databases:
