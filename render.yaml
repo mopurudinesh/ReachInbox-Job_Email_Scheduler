@@ -1,0 +1,80 @@
+services:
+  # 1. Combined API Server and Background Worker (Free Tier Friendly)
+  - type: web
+    name: reachinbox-api
+    runtime: node
+    plan: free
+    region: singapore
+    buildCommand: npm install && npm run build:shared && npm run db:generate && npm run db:migrate && npm run build
+    startCommand: npx concurrently "node apps/api/dist/app.js" "node apps/worker/dist/index.js"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: API_PORT
+        value: 10000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: reachinbox-db
+          property: connectionString
+      - key: REDIS_HOST
+        fromService:
+          type: redis
+          name: reachinbox-redis
+          property: host
+      - key: REDIS_PORT
+        fromService:
+          type: redis
+          name: reachinbox-redis
+          property: port
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: TOKEN_ENCRYPTION_KEY
+        sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        sync: false
+      - key: SLACK_CLIENT_ID
+        sync: false
+      - key: SLACK_CLIENT_SECRET
+        sync: false
+      - key: SLACK_SIGNING_SECRET
+        sync: false
+      - key: SLACK_REDIRECT_URI
+        sync: false
+      - key: ETHEREAL_SMTP_USER
+        sync: false
+      - key: ETHEREAL_SMTP_PASSWORD
+        sync: false
+      - key: BULL_BOARD_USER
+        value: admin
+      - key: BULL_BOARD_PASSWORD
+        sync: false
+      - key: WORKER_CONCURRENCY
+        value: 5
+      - key: DEFAULT_HOURLY_LIMIT
+        value: 50
+      - key: DEFAULT_DELAY_BETWEEN_EMAILS_SECONDS
+        value: 2
+
+  # 2. React Frontend Static Site
+  - type: web
+    name: reachinbox-web
+    runtime: static
+    plan: free
+    region: singapore
+    buildCommand: npm install && npm run build:shared && npm run build --workspace=@reachinbox/web
+    staticPublishPath: apps/web/dist
+
+# 3. Managed PostgreSQL Database
+databases:
+  - name: reachinbox-db
+    databaseName: reachinbox_db
+    user: reachinbox_user
+    plan: free
+    region: singapore
+
+# 4. Managed Redis Instance
+# Note: Render Key-Value is provisioned alongside the services
