@@ -59,7 +59,7 @@ services:
       - key: DEFAULT_DELAY_BETWEEN_EMAILS_SECONDS
         value: 2
 
-  # 2. React Frontend Static Site
+# 2. React Frontend Static Site
 - type: web
   name: reachinbox-web
   runtime: static
@@ -73,7 +73,6 @@ databases:
     databaseName: reachinbox_db
     user: reachinbox_user
     plan: free
-    region: singapore
 
 # 4. Managed Redis Instance
 # Note: Render Key-Value is provisioned alongside the services
