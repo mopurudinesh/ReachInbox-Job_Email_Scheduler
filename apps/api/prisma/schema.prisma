@@ -1,0 +1,213 @@
+// Prisma Schema for ReachInbox Email Scheduler
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../../../node_modules/.prisma/client"
+}
+
+model User {
+  id               String             @id @default(uuid())
+  googleId         String?            @unique
+  passwordHash     String?
+  email            String             @unique
+  name             String
+  avatarUrl        String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  senderAccounts   SenderAccount[]
+  campaigns        EmailCampaign[]
+  campaignIdempotencyKeys CampaignIdempotency[]
+  slackIntegrations SlackIntegration[]
+  sessions         Session[]
+  passwordResetTokens PasswordResetToken[]
+
+  @@map("users")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@map("password_reset_tokens")
+}
+
+model Session {
+  sid       String   @id
+  userId    String?
+  data      Json
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+  @@index([userId])
+  @@map("sessions")
+}
+
+model SenderAccount {
+  id               String             @id @default(uuid())
+  userId           String
+  email            String
+  name             String
+  hourlyLimit      Int                @default(50)
+  status           String             @default("ACTIVE") // ACTIVE, DISCONNECTED, PAUSED
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaigns        EmailCampaign[]
+  rateLimitLogs    RateLimitLog[]
+
+  @@unique([userId, email])
+  @@index([userId])
+  @@map("sender_accounts")
+}
+
+model EmailCampaign {
+  id                  String             @id @default(uuid())
+  userId              String
+  senderId            String
+  subject             String
+  body                String             @db.Text
+  ccRecipients        String[]           @default([])
+  bccRecipients       String[]           @default([])
+  scheduledAt         DateTime
+  delayBetweenSeconds Int                @default(2)
+  hourlyLimit         Int                @default(50)
+  status              String             @default("SCHEDULED") // SCHEDULED, PROCESSING, COMPLETED, FAILED, CANCELLED
+  totalRecipients     Int                @default(0)
+  sentCount           Int                @default(0)
+  failedCount         Int                @default(0)
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  user                User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sender              SenderAccount      @relation(fields: [senderId], references: [id], onDelete: Restrict)
+  jobs                EmailJob[]
+  attachments         EmailAttachment[]
+
+  @@index([userId, status])
+  @@index([scheduledAt])
+  @@map("email_campaigns")
+}
+
+model CampaignIdempotency {
+  id             String   @id @default(uuid())
+  userId         String
+  key            String
+  requestHash    String
+  campaignId     String
+  recipientCount Int
+  createdAt      DateTime @default(now())
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+  @@index([campaignId])
+  @@map("campaign_idempotency")
+}
+
+model EmailAttachment {
+  id          String        @id @default(uuid())
+  campaignId  String
+  fileName    String
+  contentType String
+  size        Int
+  content     Bytes
+  inline      Boolean       @default(false)
+  contentId   String?
+  createdAt   DateTime      @default(now())
+
+  campaign    EmailCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("email_attachments")
+}
+
+model EmailJob {
+  id                 String             @id @default(uuid())
+  campaignId         String
+  recipientEmail     String
+  status             String             @default("SCHEDULED") // SCHEDULED, QUEUED, PROCESSING, SENT, FAILED, DEFERRED, UNKNOWN, CANCELLED
+  scheduledFor       DateTime
+  deferredReason     String?
+  attemptNumber      Int                @default(0)
+  sentAt             DateTime?
+  errorMessage       String?            @db.Text
+  etherealPreviewUrl String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  campaign           EmailCampaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  attempts           EmailAttempt[]
+
+  @@index([campaignId, status])
+  @@index([scheduledFor, status])
+  @@index([recipientEmail])
+  @@map("email_jobs")
+}
+
+model EmailAttempt {
+  id             String   @id @default(uuid())
+  emailJobId     String
+  attemptNumber  Int
+  startedAt      DateTime @default(now())
+  completedAt    DateTime?
+  accepted       Boolean  @default(false)
+  smtpMessageId  String?
+  previewUrl     String?
+  errorMessage   String?  @db.Text
+
+  emailJob       EmailJob @relation(fields: [emailJobId], references: [id], onDelete: Cascade)
+
+  @@unique([emailJobId, attemptNumber])
+  @@index([emailJobId, startedAt])
+  @@map("email_attempts")
+}
+
+model SlackIntegration {
+  id                 String             @id @default(uuid())
+  userId             String
+  teamId             String
+  teamName           String
+  accessTokenEncrypted        String
+  incomingWebhookEncrypted   String?
+  channel            String?
+  channelId          String?
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+
+  user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, teamId])
+  @@index([userId])
+  @@map("slack_integrations")
+}
+
+model RateLimitLog {
+  id                 String             @id @default(uuid())
+  senderId           String
+  windowStart        DateTime           // Truncated to the start of the hour in UTC
+  limitReachedAt     DateTime           @default(now())
+  slackNotified      Boolean            @default(false)
+  slackNotificationClaimedAt DateTime?
+
+  sender             SenderAccount      @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, windowStart])
+  @@index([senderId])
+  @@map("rate_limit_logs")
+}

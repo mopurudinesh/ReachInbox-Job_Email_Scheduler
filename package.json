@@ -1,0 +1,32 @@
+{
+  "name": "reachinbox-scheduler",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Full-Stack Production Email Scheduling Application",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "infra:up": "docker compose -f infrastructure/docker-compose.yml up -d",
+    "infra:down": "docker compose -f infrastructure/docker-compose.yml down",
+    "infra:logs": "docker compose -f infrastructure/docker-compose.yml logs -f",
+    "build:shared": "npm run build --workspace=@reachinbox/shared",
+    "build": "npm run build:shared && npm run build --workspaces --if-present",
+    "dev:shared": "npm run dev --workspace=@reachinbox/shared",
+    "dev:api": "npm run dev --workspace=@reachinbox/api",
+    "dev:worker": "npm run dev --workspace=@reachinbox/worker",
+    "dev:web": "npm run dev --workspace=@reachinbox/web",
+    "dev": "npm run build:shared && concurrently -n \"shared,api,worker,web\" -c \"magenta,blue,green,cyan\" \"npm:dev:shared\" \"npm:dev:api\" \"npm:dev:worker\" \"npm:dev:web\"",
+    "db:generate": "npm run db:generate --workspace=@reachinbox/api",
+    "db:migrate": "npm run db:migrate --workspace=@reachinbox/api",
+    "db:studio": "npm run db:studio --workspace=@reachinbox/api",
+    "search:reindex": "npm run search:reindex --workspace=@reachinbox/api",
+    "test": "npm run test --workspaces --if-present"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.3"
+  }
+}
