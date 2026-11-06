@@ -31,8 +31,11 @@ if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
 }
 
+const isProduction = process.env.NODE_ENV === 'production';
+const webUrl = (process.env.WEB_URL || 'http://localhost:5173').replace(/\/$/, '');
+
 app.use(cors({
-  origin: process.env.WEB_URL || 'http://localhost:5173',
+  origin: [webUrl, `${webUrl}/`, 'http://localhost:5173', 'http://localhost:5173/'],
   credentials: true,
 }));
 
@@ -46,8 +49,8 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
+    sameSite: isProduction ? 'none' : 'lax',
+    secure: isProduction,
     maxAge: 24 * 60 * 60 * 1000,
   },
 }));
