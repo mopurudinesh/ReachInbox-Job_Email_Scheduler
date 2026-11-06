@@ -12,6 +12,7 @@
     "infra:down": "docker compose -f infrastructure/docker-compose.yml down",
     "infra:logs": "docker compose -f infrastructure/docker-compose.yml logs -f",
     "build:shared": "npm run build --workspace=@reachinbox/shared",
+    "build:backend": "npm run build:shared && npm run build --workspace=@reachinbox/api && npm run build --workspace=@reachinbox/worker",
     "build": "npm run build:shared && npm run build --workspaces --if-present",
     "dev:shared": "npm run dev --workspace=@reachinbox/shared",
     "dev:api": "npm run dev --workspace=@reachinbox/api",

@@ -24,6 +24,12 @@
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
     "@reachinbox/shared": "*",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/express-session": "^1.18.1",
+    "@types/node": "^22.13.5",
+    "@types/passport": "^1.0.17",
+    "@types/passport-google-oauth20": "^2.0.16",
     "bullmq": "^5.41.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -33,17 +39,11 @@
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "pg": "^8.16.3",
+    "typescript": "^5.7.3",
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/express-session": "^1.18.1",
-    "@types/node": "^22.13.5",
-    "@types/passport": "^1.0.17",
-    "@types/passport-google-oauth20": "^2.0.16",
     "prisma": "^7.10.1",
-    "tsx": "^4.19.3",
-    "typescript": "^5.7.3"
+    "tsx": "^4.19.3"
   }
 }

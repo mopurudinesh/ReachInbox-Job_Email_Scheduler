@@ -5,7 +5,7 @@ services:
     runtime: node
     plan: free
     region: singapore
-    buildCommand: npm install && npm run build:shared && npm run db:generate && npm run db:deploy && npm run build
+    buildCommand: npm install --include=dev && npm run build:shared && npm run db:generate && npm run db:deploy && npm run build:backend
     startCommand: npx concurrently "node apps/api/dist/app.js" "node apps/worker/dist/index.js"
     envVars:
       - key: NODE_ENV
