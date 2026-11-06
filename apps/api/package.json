@@ -5,6 +5,7 @@
   "main": "dist/app.js",
   "scripts": {
     "build": "tsc",
+    "start": "node dist/app.js",
     "dev": "tsx watch src/app.ts",
     "clean": "rimraf dist",
     "prisma:generate": "prisma generate",

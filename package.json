@@ -14,6 +14,8 @@
     "build:shared": "npm run build --workspace=@reachinbox/shared",
     "build:backend": "npm run build:shared && npm run build --workspace=@reachinbox/api && npm run build --workspace=@reachinbox/worker",
     "build": "npm run build:shared && npm run build --workspaces --if-present",
+    "start": "node apps/api/dist/app.js",
+    "start:all": "concurrently \"node apps/api/dist/app.js\" \"node apps/worker/dist/index.js\"",
     "dev:shared": "npm run dev --workspace=@reachinbox/shared",
     "dev:api": "npm run dev --workspace=@reachinbox/api",
     "dev:worker": "npm run dev --workspace=@reachinbox/worker",
@@ -26,8 +28,10 @@
     "search:reindex": "npm run search:reindex --workspace=@reachinbox/api",
     "test": "npm run test --workspaces --if-present"
   },
+  "dependencies": {
+    "concurrently": "^9.1.2"
+  },
   "devDependencies": {
-    "concurrently": "^9.1.2",
     "rimraf": "^6.0.1",
     "typescript": "^5.7.3"
   }
